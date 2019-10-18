@@ -58,9 +58,12 @@ void autonomous() {}
  */
 void opcontrol() {
 	pros::Motor mtr(1);
+	pros::Motor mtr2(2);
 	while (true) {
 		int analog = controller.get_analog(ANALOG_LEFT_Y);
+		int analog2 = controller.get_analog(ANALOG_RIGHT_Y);
 		mtr = analog;
+		mtr2 = analog2;
 		pros::delay(20);
 	}
 }
