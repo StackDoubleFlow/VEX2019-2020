@@ -1,9 +1,22 @@
+
 #include "main.h"
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
+const pros::Motor FRONT_LEFT(1, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
+const pros::Motor FRONT_RIGHT(2, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
+const pros::Motor BACK_LEFT(3, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
+const pros::Motor BACK_RIGHT(4, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
+
+
+float clamp(float value, float min, float max) {
+	value = value > max ? max : value;
+	value = value < min ? min : value;
+	return value;
+}
+
 /**
- * Runs initialization code. This occurs as soon as the program is started.
+ * Runs initialization code. This occcurs as soon as the program is started.
  *
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
@@ -57,13 +70,15 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Motor mtr(1);
-	pros::Motor mtr2(2);
 	while (true) {
-		int analog = controller.get_analog(ANALOG_LEFT_Y);
-		int analog2 = controller.get_analog(ANALOG_RIGHT_Y);
-		mtr = analog;
-		mtr2 = analog2;
+		int analogY = controller.get_analog(ANALOG_RIGHT_Y);
+		int analogX = controller.get_analog(ANALOG_RIGHT_X);
+
+		FRONT_LEFT = (clamp(analogX, -100, 0) + clamp(analogY, 0, 100)) / 2;
+		FRONT_RIGHT = (clamp(analogX, 0, 100) + clamp(analogY, 0, 100)) / 2;
+		BACK_LEFT = (clamp(analogX, -100, 0) + clamp(analogY, -100, 0)) / 2;
+		BACK_RIGHT = (clamp(analogX, 0, 100) + clamp(analogY, -100, 0)) / 2;
+
 		pros::delay(20);
 	}
 }
