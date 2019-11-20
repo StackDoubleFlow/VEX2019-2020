@@ -3,7 +3,7 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
-const pros::Motor FRONT_LEFT(1, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
+const pros::Motor FRONT_LEFT(1, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
 const pros::Motor FRONT_RIGHT(2, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
 const pros::Motor BACK_LEFT(3, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
 const pros::Motor BACK_RIGHT(4, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
@@ -75,11 +75,6 @@ void opcontrol() {
 		int analogY = controller.get_analog(ANALOG_RIGHT_Y);
 		int analogX = controller.get_analog(ANALOG_RIGHT_X);
 		THE_WINCH = (analogX + analogY) / 2;
-
-		FRONT_LEFT = (clamp(analogX, -100, 0) + clamp(analogY, 0, 100)) / 2;
-		FRONT_RIGHT = (clamp(analogX, 0, 100) + clamp(analogY, 0, 100)) / 2;
-		BACK_LEFT = (clamp(analogX, -100, 0) + clamp(analogY, -100, 0)) / 2;
-		BACK_RIGHT = (clamp(analogX, 0, 100) + clamp(analogY, -100, 0)) / 2;
 
 		pros::delay(20);
 	}
