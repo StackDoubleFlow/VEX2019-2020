@@ -71,7 +71,7 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	while (true) {
+	for(;;) {
 		int analogY = controller.get_analog(ANALOG_RIGHT_Y);
 		int analogX = controller.get_analog(ANALOG_RIGHT_X);
 		THE_WINCH = (analogX + analogY) / 2;
