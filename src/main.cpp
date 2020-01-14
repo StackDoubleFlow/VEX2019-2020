@@ -3,10 +3,9 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
-const pros::Motor FRONT_LEFT(1, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
-const pros::Motor FRONT_RIGHT(2, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
-const pros::Motor BACK_LEFT(3, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
-const pros::Motor BACK_RIGHT(4, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
+const pros::Motor LEFT(1, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
+const pros::Motor RIGHT(2, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
+const pros::Motor WALL(4);
 const pros::Motor THE_WINCH(5);
 
 
@@ -70,11 +69,28 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {
+void opcontrol() {									
+	bool isReversed = false;																																																																																																																																																																																																																																																																																																																																																																																																																						
 	for(;;) {
-		int analogY = controller.get_analog(ANALOG_RIGHT_Y);
-		int analogX = controller.get_analog(ANALOG_RIGHT_X);
-		THE_WINCH = (analogX + analogY) / 2;
+		int analogLeft = controller.get_analog(ANALOG_LEFT_Y);
+		int analogRight = controller.get_analog(ANALOG_RIGHT_Y);
+
+		if(controller.get_digital_new_press(DIGITAL_X)) {
+			isReversed = !isReversed;
+		}
+
+		if(controller.get_digital_new_press(DIGITAL_A)) {
+			WALL.move_relative(16, 200);
+			WALL.move_relative(-16, 200);
+		}
+
+		if(isReversed) {
+			LEFT = -analogRight;
+			RIGHT = -analogLeft;
+		} else {
+			LEFT = analogLeft;
+			RIGHT = analogRight;
+		}
 
 		pros::delay(20);
 	}
