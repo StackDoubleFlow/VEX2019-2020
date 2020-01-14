@@ -81,6 +81,7 @@ void opcontrol() {
 
 		if(controller.get_digital_new_press(DIGITAL_A)) {
 			WALL.move_relative(16, 200);
+			pros::delay(20);
 			WALL.move_relative(-16, 200);
 		}
 
