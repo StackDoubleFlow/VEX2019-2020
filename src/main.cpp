@@ -11,11 +11,11 @@ const pros::Motor THE_WINCH(5);
 #define MAX_VELOCITY_18 200
 
 
-float clamp(float value, float min, float max) {
-	value = value > max ? max : value;
-	value = value < min ? min : value;
-	return value;
-}
+// float clamp(float value, float min, float max) {
+// 	value = value > max ? max : value;
+// 	value = value < min ? min : value;
+// 	return value;
+// }
 
 /**
  * Runs initialization code. This occcurs as soon as the program is started.
