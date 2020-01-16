@@ -5,8 +5,10 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 const pros::Motor LEFT(1, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
 const pros::Motor RIGHT(2, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
-const pros::Motor WALL(4);
+const pros::Motor WALL(4, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
 const pros::Motor THE_WINCH(5);
+
+#define MAX_VELOCITY_18 200
 
 
 float clamp(float value, float min, float max) {
@@ -22,7 +24,7 @@ float clamp(float value, float min, float max) {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-
+	WALL.set_encoder_units(MOTOR_ENCODER_DEGREES);
 }
 
 /**
@@ -56,6 +58,10 @@ void competition_initialize() {}
  */
 void autonomous() {}
 
+void deploy_wall() {
+
+}
+
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -69,20 +75,37 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {									
+void opcontrol() {						
+	int wall_timer = -1;			
 	bool isReversed = false;																																																																																																																																																																																																																																																																																																																																																																																																																						
 	for(;;) {
 		int analogLeft = controller.get_analog(ANALOG_LEFT_Y);
 		int analogRight = controller.get_analog(ANALOG_RIGHT_Y);
+		bool R1 = controller.get_digital(DIGITAL_R1);
+		bool L1 = controller.get_digital(DIGITAL_L1);
+
+		if(R1) {
+			THE_WINCH = 64;
+		}else if(L1) {
+			THE_WINCH = -64;
+		} else {
+			THE_WINCH = 0;
+		}
 
 		if(controller.get_digital_new_press(DIGITAL_X)) {
 			isReversed = !isReversed;
 		}
 
-		if(controller.get_digital_new_press(DIGITAL_A)) {
-			WALL.move_relative(16, 200);
-			pros::delay(20);
-			WALL.move_relative(-16, 200);
+		
+		if(wall_timer > -1) wall_timer--;
+
+		if(wall_timer == 0) {
+			WALL.move_relative(-75, MAX_VELOCITY_18);
+		}
+		if(controller.get_digital_new_press(DIGITAL_A) && wall_timer == -1) {
+			WALL.move_relative(75, MAX_VELOCITY_18);
+			
+			wall_timer = 100;
 		}
 
 		if(isReversed) {
