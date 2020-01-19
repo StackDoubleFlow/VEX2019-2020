@@ -3,20 +3,12 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
-const pros::Motor LEFT(8, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
-const pros::Motor RIGHT(2, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
-const pros::Motor WALL_PUSHER(4, pros::motor_gearset_e::E_MOTOR_GEARSET_36);
-const pros::Motor WALL_LATCH(5);
-const pros::Motor THE_WINCH(6);
+const pros::Motor LEFT_FRONT(1);
+const pros::Motor LEFT_BACK(2);
+const pros::Motor RIGHT_FRONT(3);
+const pros::Motor RIGHT_BACK(4);
 
 #define MAX_VELOCITY_18 200
-
-
-// float clamp(float value, float min, float max) {
-// 	value = value > max ? max : value;
-// 	value = value < min ? min : value;
-// 	return value;
-// }
 
 /**
  * Runs initialization code. This occcurs as soon as the program is started.
@@ -25,9 +17,8 @@ const pros::Motor THE_WINCH(6);
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	//WALL.set_encoder_units(MOTOR_ENCODER_DEGREES);
-	WALL_LATCH.set_encoder_units(MOTOR_ENCODER_DEGREES);
-	WALL_LATCH.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	LEFT_FRONT.set_reversed(true);
+	LEFT_BACK.set_reversed(true);
 }
 
 /**
@@ -77,41 +68,11 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {		
-	// When the timer is -1, the sequence is not running				
-	int wall_timer = -1;
 	bool isReversed = false;																																																																																																																																																																																																																																																																																																																																																																																																																						
 	for(;;) {
-		// Winch
-		bool R1 = controller.get_digital(DIGITAL_R1);
-		bool L1 = controller.get_digital(DIGITAL_L1);
-
-		if(R1) {
-			THE_WINCH = 64;
-		}else if(L1) {
-			THE_WINCH = -64;
-		} else {
-			THE_WINCH = 0;
-		}
-
 		// Reversing
 		if(controller.get_digital_new_press(DIGITAL_X)) {
 			isReversed = !isReversed;
-		}
-
-		// Wall sequence
-		if(wall_timer != -1) wall_timer--;
-
-		if(wall_timer == 0) {
-			WALL_PUSHER.move_relative(100, 100/2);
-			WALL_LATCH.move_relative(-120, MAX_VELOCITY_18);
-		} else if(wall_timer == 70) {
-			WALL_PUSHER.move_relative(-100, 100);
-		}
-
-		if(controller.get_digital_new_press(DIGITAL_A) && wall_timer == -1) {
-			WALL_LATCH.move_relative(120, MAX_VELOCITY_18);
-			
-			wall_timer = 100;
 		}
 
 		// Driving
@@ -119,11 +80,15 @@ void opcontrol() {
 		int analogRight = controller.get_analog(ANALOG_RIGHT_Y);
 
 		if(isReversed) {
-			LEFT = -analogRight;
-			RIGHT = -analogLeft;
+			LEFT_FRONT = -analogRight;
+			LEFT_BACK = -analogRight;
+			RIGHT_FRONT = -analogLeft;
+			RIGHT_BACK = -analogLeft;
 		} else {
-			LEFT = analogLeft;
-			RIGHT = analogRight;
+			LEFT_FRONT = analogLeft;
+			LEFT_BACK = analogLeft;
+			RIGHT_FRONT = analogRight;
+			RIGHT_BACK = analogRight;
 		}
 
 		pros::delay(20);
