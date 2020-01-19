@@ -58,10 +58,6 @@ void competition_initialize() {}
  */
 void autonomous() {}
 
-void deploy_wall() {
-
-}
-
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -79,8 +75,7 @@ void opcontrol() {
 	int wall_timer = -1;			
 	bool isReversed = false;																																																																																																																																																																																																																																																																																																																																																																																																																						
 	for(;;) {
-		int analogLeft = controller.get_analog(ANALOG_LEFT_Y);
-		int analogRight = controller.get_analog(ANALOG_RIGHT_Y);
+		// Winch
 		bool R1 = controller.get_digital(DIGITAL_R1);
 		bool L1 = controller.get_digital(DIGITAL_L1);
 
@@ -92,21 +87,27 @@ void opcontrol() {
 			THE_WINCH = 0;
 		}
 
+		// Reversing
 		if(controller.get_digital_new_press(DIGITAL_X)) {
 			isReversed = !isReversed;
 		}
 
-		
+		// Wall
 		if(wall_timer > -1) wall_timer--;
 
 		if(wall_timer == 0) {
 			WALL.move_relative(-75, MAX_VELOCITY_18);
 		}
+		
 		if(controller.get_digital_new_press(DIGITAL_A) && wall_timer == -1) {
 			WALL.move_relative(75, MAX_VELOCITY_18);
 			
 			wall_timer = 100;
 		}
+
+		// Driving
+		int analogLeft = controller.get_analog(ANALOG_LEFT_Y);
+		int analogRight = controller.get_analog(ANALOG_RIGHT_Y);
 
 		if(isReversed) {
 			LEFT = -analogRight;
