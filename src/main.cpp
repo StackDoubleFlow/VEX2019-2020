@@ -3,10 +3,11 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
-const pros::Motor LEFT(1, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
+const pros::Motor LEFT(8, pros::motor_gearset_e::E_MOTOR_GEARSET_18, false);
 const pros::Motor RIGHT(2, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
-const pros::Motor WALL(4, pros::motor_gearset_e::E_MOTOR_GEARSET_18, true);
-const pros::Motor THE_WINCH(5);
+const pros::Motor WALL_PUSHER(4, pros::motor_gearset_e::E_MOTOR_GEARSET_36);
+const pros::Motor WALL_LATCH(5);
+const pros::Motor THE_WINCH(6);
 
 #define MAX_VELOCITY_18 200
 
@@ -24,7 +25,9 @@ const pros::Motor THE_WINCH(5);
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	WALL.set_encoder_units(MOTOR_ENCODER_DEGREES);
+	//WALL.set_encoder_units(MOTOR_ENCODER_DEGREES);
+	WALL_LATCH.set_encoder_units(MOTOR_ENCODER_DEGREES);
+	WALL_LATCH.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -43,7 +46,8 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize() {}
+void competition_initialize() {
+}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -56,7 +60,8 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -71,8 +76,9 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {						
-	int wall_timer = -1;			
+void opcontrol() {		
+	// When the timer is -1, the sequence is not running				
+	int wall_timer = -1;
 	bool isReversed = false;																																																																																																																																																																																																																																																																																																																																																																																																																						
 	for(;;) {
 		// Winch
@@ -92,15 +98,18 @@ void opcontrol() {
 			isReversed = !isReversed;
 		}
 
-		// Wall
-		if(wall_timer > -1) wall_timer--;
+		// Wall sequence
+		if(wall_timer != -1) wall_timer--;
 
 		if(wall_timer == 0) {
-			WALL.move_relative(-75, MAX_VELOCITY_18);
+			WALL_PUSHER.move_relative(100, 100/2);
+			WALL_LATCH.move_relative(-120, MAX_VELOCITY_18);
+		} else if(wall_timer == 70) {
+			WALL_PUSHER.move_relative(-100, 100);
 		}
-		
+
 		if(controller.get_digital_new_press(DIGITAL_A) && wall_timer == -1) {
-			WALL.move_relative(75, MAX_VELOCITY_18);
+			WALL_LATCH.move_relative(120, MAX_VELOCITY_18);
 			
 			wall_timer = 100;
 		}
