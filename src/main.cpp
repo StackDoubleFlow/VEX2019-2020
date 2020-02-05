@@ -67,8 +67,6 @@ void autonomous() {
 /**
  * Turns a motor in the response of two buttons.
  * 
- * \note 
- * 
  * \param velocity  
  *        The maximum allowable velocity for the movement in RPM 
  * \param button1  
