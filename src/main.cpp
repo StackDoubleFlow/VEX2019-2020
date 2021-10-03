@@ -4,15 +4,15 @@
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // Drivetrain motors
-const pros::Motor LEFT_FRONT(1);
-const pros::Motor LEFT_BACK(2);
-const pros::Motor RIGHT_FRONT(3);
-const pros::Motor RIGHT_BACK(4);
+const pros::Motor LEFT_FRONT(11);
+const pros::Motor LEFT_BACK(12);
+const pros::Motor RIGHT_FRONT(17);
+const pros::Motor RIGHT_BACK(18);
 
 // Intake motors
-const pros::Motor INTAKE_LEFT(5);
-const pros::Motor INTAKE_RIGHT(6);
-const pros::Motor INTAKE_LIFT(7, pros::E_MOTOR_GEARSET_36);
+const pros::Motor INTAKE_LEFT(1);
+const pros::Motor INTAKE_RIGHT(10);
+const pros::Motor INTAKE_LIFT(2, pros::E_MOTOR_GEARSET_36);
 
 
 // These macros help so we don't have to memorize the max volocities for
@@ -26,8 +26,8 @@ const pros::Motor INTAKE_LIFT(7, pros::E_MOTOR_GEARSET_36);
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	LEFT_FRONT.set_reversed(true);
-	LEFT_BACK.set_reversed(true);
+	RIGHT_FRONT.set_reversed(true);
+	RIGHT_BACK.set_reversed(true);
 	INTAKE_RIGHT.set_reversed(true);
 }
 
@@ -50,6 +50,14 @@ void disabled() {}
 void competition_initialize() {
 }
 
+
+void set_drive_train(float left, float right) {
+	LEFT_FRONT.move_velocity(left);
+	LEFT_BACK.move_velocity(left);
+	RIGHT_FRONT.move_velocity(right);
+	RIGHT_BACK.move_velocity(right);
+}
+
 /**
  * Runs the user autonomous code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -62,6 +70,11 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
+	set_drive_train(60, 60);
+	pros::delay(3000);
+	set_drive_train(-60, -60);
+	pros::delay(3000);
+	set_drive_train(0, 0);
 }
 
 /**
@@ -97,9 +110,10 @@ void two_button_motor(int32_t velocity, pros::controller_digital_e_t button1, pr
 	} else if (controller.get_digital(button2)) {
 		motor.move_velocity(-velocity); // If button2 was pressed, move motor backwards
 	}
+
 }
 
-void boolean_button_toggle(pros::controller_digital_e_t btn, bool& b) {
+void inline boolean_button_toggle(pros::controller_digital_e_t btn, bool& b) {
 	if(controller.get_digital_new_press(btn)) b=!b;
 }
 
@@ -119,6 +133,7 @@ void tank_drive_reversable(pros::controller_analog_e_t analog_left, pros::contro
 		RIGHT_BACK = analogRight;
 	}
 }
+
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -145,7 +160,13 @@ void opcontrol() {
 		two_button_motor(120, DIGITAL_L1, DIGITAL_R1, INTAKE_LEFT);
 		two_button_motor(120, DIGITAL_L1, DIGITAL_R1, INTAKE_RIGHT);
 
-		two_button_motor(120, DIGITAL_L2, DIGITAL_R2, INTAKE_LIFT);
+		two_button_motor(15, DIGITAL_L2, DIGITAL_R2, INTAKE_LIFT);
+
+		if (controller.get_digital(DIGITAL_B)) {
+			INTAKE_LEFT.move_velocity(-20);
+			INTAKE_LEFT.move_velocity(-20);
+			set_drive_train(20, 20);
+		}
 
 		pros::delay(20);
 	}
